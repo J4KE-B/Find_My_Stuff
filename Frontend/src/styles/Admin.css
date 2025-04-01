@@ -1,0 +1,165 @@
+/* Admin Page Styles - Dark Theme */
+.admin-container {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #111;
+    padding: 20px;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.5);
+    transition: width 0.3s ease-in-out;
+}
+
+.sidebar:hover {
+    width: 260px;
+}
+
+.sidebar h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 15px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar li:hover {
+    background: #333;
+    transform: translateX(10px);
+}
+
+.sidebar li i {
+    margin-right: 12px; /* Space for icons */
+}
+
+.sidebar li.active {
+    background: #28a745;
+    color: white;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    max-width: 900px;
+    margin: auto;
+    overflow-y: auto;
+}
+
+.main-content h1 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #f0f0f0;
+}
+
+/* Table */
+.admin-table {
+    width: 100%;
+    background: #222;
+    border-radius: 10px;
+    border-collapse: collapse;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 16px;
+    text-align: left;
+    font-size: 16px;
+}
+
+.admin-table th {
+    background: #333;
+    color: #fff;
+    font-weight: 500;
+}
+
+.admin-table tr:nth-child(even) {
+    background: #1a1a1a;
+}
+
+.admin-table tr:hover {
+    background: #333;
+    transform: scale(1.02);
+    transition: background 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Buttons */
+.action-buttons button {
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.approve-btn {
+    background: #28a745;
+    color: white;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.approve-btn:hover {
+    background: #218838;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.action-buttons button i {
+    margin-right: 8px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .admin-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        box-shadow: none;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 10px;
+    }
+}
