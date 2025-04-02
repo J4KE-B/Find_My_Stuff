@@ -105,8 +105,8 @@ app.post('/lost', authenticateUser, async (req, res) => {
         // ✅ Fetch only found items where status is "Not Found"
         const { data: foundItems, error: foundError } = await supabase
             .from('found_items')
-            .select('*')
-            .eq('status', 'Not Found');  // 👈 Filter only "Not Found" items
+            .select('*');
+            // .eq('status', 'Not Found');  // 👈 Filter only "Not Found" items
 
         if (foundError) throw foundError;
 
@@ -200,7 +200,8 @@ app.post('/found', authenticateUser, async (req, res) => {
         const foundItem = foundData[0];
 
         // ✅ Fetch all lost items
-        const { data: lostItems, error: lostError } = await supabase.from('lost_items').select('*').eq('status','Not Found');
+        const { data: lostItems, error: lostError } = await supabase.from('lost_items').select('*');
+        // .eq('status','Not Found');
         if (lostError) throw lostError;
 
         let bestMatch = null;
