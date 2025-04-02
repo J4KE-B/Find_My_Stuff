@@ -115,7 +115,7 @@ const FoundItems = () => {
         dateTimeFound: "",
       });
       setError("");  // Clear error if successful
-      navigate("/dashboard");  // Redirect to the dashboard
+      navigate("/home");  // Redirect to the dashboard
     } catch (error) {
       setError("Failed to submit the found item.");
       console.error("Submission Error:", error);

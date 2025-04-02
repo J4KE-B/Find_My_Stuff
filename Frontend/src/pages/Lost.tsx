@@ -64,7 +64,7 @@ const LostItems = () => {
           dateLost: "",
         });
         setError(""); // Clear any error if successful
-        navigate("/dashboard"); // Redirect to dashboard after submission
+        navigate("/home"); // Redirect to dashboard after submission
       }
     } catch (error) {
       // Debug: Log the error from the request

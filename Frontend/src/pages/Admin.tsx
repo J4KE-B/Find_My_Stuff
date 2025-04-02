@@ -56,24 +56,10 @@ const Admin = () => {
 
   return (
     <div className="admin-container">
-      <aside className="admin-sidebar">
-        <h2>Admin Panel</h2>
-        <ul>
-          <li>Dashboard</li>
-          <li>Manage Reports</li>
-          <li>Settings</li>
-        </ul>
-        {/* Register New User Button */}
-        <button
-          className="register-btn"
-          onClick={() => navigate("/register", { state: { fromAdmin: true } })}
-        >
-          Register New User
-        </button>
-      </aside>
+    
 
       <main className="admin-content">
-        <h1>Manage Lost & Found Reports</h1>
+        {/* <h1>Manage Lost & Found Reports</h1>
         <table className="admin-table">
           <thead>
             <tr>
@@ -108,7 +94,7 @@ const Admin = () => {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table> */}
 
         {/* Register User Form */}
         <div className="register-form">

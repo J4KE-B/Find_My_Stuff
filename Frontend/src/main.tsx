@@ -22,7 +22,7 @@ if (rootElement) {
       
         <Router>
           <Routes>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard type={"lost"} />} />
           <Route path="/" element={<Main />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
