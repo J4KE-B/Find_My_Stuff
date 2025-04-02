@@ -2,7 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./styles/index.css";
-
+import "./styles/main.css"
+import "tailwindcss";
 import Main from "./pages/Main"
 import Home from "./pages/Home";
 import Login from "./pages/LoginPage";
@@ -25,10 +26,10 @@ if (rootElement) {
           <Route path="/dashboard" element={<Dashboard type={"lost"} />} />
           <Route path="/" element={<Main />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<PrivateRoute element={<Home />} />} />
           <Route path="/lost" element={<PrivateRoute element={<Lost />} />} />
           <Route path="/found" element={<PrivateRoute element={<Found />} />} />
-          <Route path="/admin" element={<PrivateRoute element={<Admin />} />} />
+          <Route path="/admin" element={<Admin />} />
           </Routes>
         </Router>
       

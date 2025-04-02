@@ -1,126 +1,65 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Import axios
-import "../styles/Admin.css";
+import axios from "axios";
 
 const Admin = () => {
-  const navigate = useNavigate(); // For navigation
-
-  const [reports, setReports] = useState([
-    { id: 1, name: "Laptop", type: "Lost", date: "2025-03-15", status: "Pending" },
-    { id: 2, name: "Wallet", type: "Found", date: "2025-03-16", status: "Resolved" },
-  ]);
-
-  const [registerData, setRegisterData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const navigate = useNavigate();
+  const [registerData, setRegisterData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-  const handleAction = (id: number, action: string) => {
-    setReports((prevReports) =>
-      prevReports.map((report) =>
-        report.id === id ? { ...report, status: action } : report
-      )
-    );
-  };
-
-  const handleRegisterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRegisterChange = (e) => {
     const { name, value } = e.target;
     setRegisterData({ ...registerData, [name]: value });
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-
     if (!registerData.email || !registerData.password) {
       setError("Email and Password are required!");
       return;
     }
-
     try {
-      // Make an axios POST request to the backend to register the user
-      const response = await axios.post("http://localhost:5000/register", {
-        email: registerData.email,
-        password: registerData.password,
-      });
-
+      await axios.post("http://localhost:5000/register", registerData);
       alert("User Registered Successfully");
       setRegisterData({ email: "", password: "" });
-      setError(""); // Clear any errors after successful registration
-    } catch (err: any) {
+      setError("");
+    } catch (err) {
       setError(err?.response?.data?.error || "Failed to register user");
     }
   };
 
   return (
-    <div className="admin-container">
-    
-
-      <main className="admin-content">
-        {/* <h1>Manage Lost & Found Reports</h1>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Item Name</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reports.map((report) => (
-              <tr key={report.id}>
-                <td>{report.name}</td>
-                <td>{report.type}</td>
-                <td>{report.date}</td>
-                <td>{report.status}</td>
-                <td>
-                  <button
-                    className="approve-btn"
-                    onClick={() => handleAction(report.id, "Approved")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleAction(report.id, "Deleted")}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table> */}
-
-        {/* Register User Form */}
-        <div className="register-form">
-          <h3>Register New User</h3>
-          {error && <p className="error-message">{error}</p>}
-          <form onSubmit={handleRegisterSubmit}>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={registerData.email}
-              onChange={handleRegisterChange}
-              required
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={registerData.password}
-              onChange={handleRegisterChange}
-              required
-            />
-            <button type="submit">Register</button>
-          </form>
-        </div>
-      </main>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+        <h3 className="text-xl font-semibold mb-4 text-center">Register New User</h3>
+        {error && <p className="text-red-500 text-sm text-center mb-3">{error}</p>}
+        <form onSubmit={handleRegisterSubmit} className="space-y-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={registerData.email}
+            onChange={handleRegisterChange}
+            required
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={registerData.password}
+            onChange={handleRegisterChange}
+            required
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            Register
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -27,6 +27,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="container">
+   
       {/* Header with Login button */}
       <div className="auth-buttons">
         <button onClick={() => navigate("/login")}>Login</button>

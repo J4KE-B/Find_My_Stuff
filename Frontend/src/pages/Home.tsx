@@ -23,6 +23,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="container">
+     
       {/* Display error message if not logged in */}
       {error && (
         <p className="error-message" style={{ color: "red", fontWeight: "bold", marginTop: "10px" }}>
