@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";  // Import axios
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../styles/LostAndFound.css"; // Make sure the styles are shared
+import "../styles/LostAndFound.css";
 
 const LostItems = () => {
   const [formData, setFormData] = useState({
@@ -9,37 +9,37 @@ const LostItems = () => {
     location: "",
     dateLost: "",
   });
-  const [error, setError] = useState<string>(""); 
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false); // New loading state for submission
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true); // Show loading popup
 
-    // Debug: Log form data before sending it to the backend
     console.log("Form data being submitted:", formData);
 
     if (!formData.description || !formData.location || !formData.dateLost) {
       setError("Please fill in all fields.");
       console.log("Validation failed: Missing required fields.");
+      setSubmitting(false);
       return;
     }
 
-    // Retrieve the token from localStorage (which should be set after login)
     const token = localStorage.getItem("token");
     if (!token) {
       setError("You must be logged in to submit a lost item.");
+      setSubmitting(false);
       return;
     }
 
     try {
-      // Debug: Log the URL and the data being sent
       console.log("Making POST request to backend...");
-
       const response = await axios.post(
         "http://localhost:5000/lost", 
         {
@@ -49,12 +49,11 @@ const LostItems = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Add the token here
+            Authorization: `Bearer ${token}`,
           }
         }
       );
 
-      // Debug: Log the response from the backend
       console.log("Response from backend:", response);
 
       if (response.status === 200) {
@@ -63,15 +62,14 @@ const LostItems = () => {
           location: "",
           dateLost: "",
         });
-        setError(""); // Clear any error if successful
-        navigate("/home"); // Redirect to dashboard after submission
+        setError("");
+        navigate("/home");
       }
     } catch (error) {
-      // Debug: Log the error from the request
       console.error("Error during request:", error);
-
-      // Display the error to the user
       setError("Failed to submit the lost item.");
+    } finally {
+      setSubmitting(false); // Hide loading popup
     }
   };
 
@@ -82,7 +80,7 @@ const LostItems = () => {
       <form onSubmit={handleSubmit}>
         <textarea
           name="description"
-          placeholder="Describe the lost item"
+          placeholder="Describe the lost item with color and accurate mode name, eg:Titanium Iphone 14 pro"
           value={formData.description}
           onChange={handleChange}
         />
@@ -101,6 +99,12 @@ const LostItems = () => {
         />
         <button type="submit">Submit</button>
       </form>
+      {submitting && (
+        <div className="loading-popup">
+          <div className="loading-spinner"></div>
+          <p>Submitting, please wait...</p>
+        </div>
+      )}
     </div>
   );
 };

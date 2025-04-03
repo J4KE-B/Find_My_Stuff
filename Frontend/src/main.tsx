@@ -29,7 +29,7 @@ if (rootElement) {
           <Route path="/home" element={<PrivateRoute element={<Home />} />} />
           <Route path="/lost" element={<PrivateRoute element={<Lost />} />} />
           <Route path="/found" element={<PrivateRoute element={<Found />} />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<PrivateRoute element={<Admin />} />} />
           </Routes>
         </Router>
       

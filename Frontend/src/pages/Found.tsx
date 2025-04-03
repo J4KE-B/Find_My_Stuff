@@ -1,55 +1,48 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";  // Import axios
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "@supabase/supabase-js";  // Import Supabase client
-import "../styles/LostAndFound.css";  // Ensure the styles are shared
+import { createClient } from "@supabase/supabase-js";
+import "../styles/LostAndFound.css";
 
-// Initialize Supabase client
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,  // Supabase URL from env variable
-  import.meta.env.VITE_SUPABASE_ANON_KEY  // Supabase Anon Key from env variable
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
 const FoundItems = () => {
   const [formData, setFormData] = useState({
     image: null,
-    possession: "With the person",  // Default possession
+    possession: "With the person",
     dateTimeFound: "",
   });
-  const [error, setError] = useState<string>("");  // Error state
-  const [imageUrl, setImageUrl] = useState<string>("");  // To store the image URL
-  const [loading, setLoading] = useState<boolean>(true);  // Track loading state to prevent redirect issues
+  const [error, setError] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false); // New loading state for submission
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if the token exists in localStorage
     const token = localStorage.getItem("token");
-
-    // If no token, redirect to login
     if (!token) {
       setError("You must be logged in to report a found item.");
       navigate("/login");
     } else {
-      setLoading(false);  // If token exists, stop loading
+      setLoading(false);
     }
-  }, [navigate]);  // Dependency array to make sure this only runs once
+  }, [navigate]);
 
-  // Handle form data changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0] || null;
     if (file) {
-      const filePath = `found-items/${Date.now()}-${file.name}`;  // Ensure unique file path by appending timestamp
-
+      const filePath = `found-items/${Date.now()}-${file.name}`;
       try {
-        // Upload the file to Supabase storage
         const { data, error: uploadError } = await supabase.storage
-          .from("found-images")  // Replace with your Supabase bucket name
+          .from("found-images")
           .upload(filePath, file);
 
         if (uploadError) {
@@ -58,7 +51,6 @@ const FoundItems = () => {
           return;
         }
 
-        // Retrieve the public URL using the uploaded file path
         const { data: { publicUrl }, error: urlError } = supabase.storage
           .from("found-images")
           .getPublicUrl(filePath);
@@ -69,7 +61,7 @@ const FoundItems = () => {
           return;
         }
 
-        setImageUrl(publicUrl);  // Save the public URL
+        setImageUrl(publicUrl);
       } catch (error) {
         setError("An unexpected error occurred while uploading the image.");
         console.error("Unexpected Upload Error:", error);
@@ -77,52 +69,49 @@ const FoundItems = () => {
     }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true); // Show loading popup
 
     if (!imageUrl || !formData.dateTimeFound) {
       setError("Please upload an image and select a date and time.");
+      setSubmitting(false);
       return;
     }
 
-    const { possession, dateTimeFound } = formData;
-
     try {
-      // Get the token from localStorage
       const token = localStorage.getItem("token");
-
       if (!token) {
         setError("You must be logged in to report a found item.");
+        setSubmitting(false);
         return;
       }
 
-      // Make an axios POST request to report the found item to the backend
-      const response = await axios.post("http://localhost:5000/found", {
+      await axios.post("http://localhost:5000/found", {
         image_url: imageUrl,
-        possession,
-        date_time_found: dateTimeFound,
+        possession: formData.possession,
+        date_time_found: formData.dateTimeFound,
       }, {
         headers: {
-          Authorization: `Bearer ${token}`,  // Use the Supabase auth token from localStorage
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      // Clear form data on success
       setFormData({
         image: null,
-        possession: "With the person",  // Reset to default
+        possession: "With the person",
         dateTimeFound: "",
       });
-      setError("");  // Clear error if successful
-      navigate("/home");  // Redirect to the dashboard
+      setError("");
+      navigate("/home");
     } catch (error) {
       setError("Failed to submit the found item.");
       console.error("Submission Error:", error);
+    } finally {
+      setSubmitting(false); // Hide loading popup
     }
   };
 
-  // If loading (while checking localStorage), render a loading message or spinner
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -132,33 +121,22 @@ const FoundItems = () => {
       <h2>Report a Found Item</h2>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          onChange={handleImageUpload}
-        />
-
-        {/* Updated possession dropdown */}
-        <select
-          name="possession"
-          value={formData.possession}
-          onChange={handleChange}
-        >
+        <input type="file" name="image" accept="image/*" onChange={handleImageUpload} />
+        <select name="possession" value={formData.possession} onChange={handleChange}>
           <option value="With the person">With the person</option>
           <option value="Old Academic">Old Academic</option>
           <option value="Control room">Control room</option>
           <option value="New Academic">New Academic</option>
         </select>
-
-        <input
-          type="datetime-local"
-          name="dateTimeFound"
-          value={formData.dateTimeFound}
-          onChange={handleChange}
-        />
+        <input type="datetime-local" name="dateTimeFound" value={formData.dateTimeFound} onChange={handleChange} />
         <button type="submit">Submit</button>
       </form>
+      {submitting && (
+        <div className="loading-popup">
+          <div className="loading-spinner"></div>
+          <p>Submitting, please wait...</p>
+        </div>
+      )}
     </div>
   );
 };

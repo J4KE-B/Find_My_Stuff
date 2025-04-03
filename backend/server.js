@@ -105,8 +105,7 @@ app.post('/lost', authenticateUser, async (req, res) => {
         // ✅ Fetch only found items where status is "Not Found"
         const { data: foundItems, error: foundError } = await supabase
             .from('found_items')
-            .select('*');
-            // .eq('status', 'Not Found');  // 👈 Filter only "Not Found" items
+            .select('*').eq('status', 'Not Found');  // 👈 Filter only "Not Found" items
 
         if (foundError) throw foundError;
 
@@ -130,6 +129,7 @@ app.post('/lost', authenticateUser, async (req, res) => {
 
             const bestMatchUserId = bestMatch.user_id;
             const currUserId = req.user.id;
+            const possession = bestMatch.possession
 
             // ✅ Fetch user details safely
             const { data: lostUserData } = await supabaseAdmin.auth.admin.getUserById(currUserId);
@@ -142,7 +142,9 @@ app.post('/lost', authenticateUser, async (req, res) => {
 
             const lostUserMail = lostUserData.user.email;
             const foundUserMail = foundUserData.user.email;
-
+            
+            
+        
             // ✅ Store match and send notification
             await supabase.from('matched_items').insert([{
                 lost_user: currUserId,
@@ -151,7 +153,7 @@ app.post('/lost', authenticateUser, async (req, res) => {
                 found_user_mail: foundUserMail
             }]);
 
-            await sendMatchNotification(lostUserMail, foundUserMail);
+            await sendMatchNotification(lostUserMail, foundUserMail, possession);
 
             return res.json({ message: "Match found and processed successfully!" });
         }
@@ -200,8 +202,8 @@ app.post('/found', authenticateUser, async (req, res) => {
         const foundItem = foundData[0];
 
         // ✅ Fetch all lost items
-        const { data: lostItems, error: lostError } = await supabase.from('lost_items').select('*');
-        // .eq('status','Not Found');
+        const { data: lostItems, error: lostError } = await supabase.from('lost_items').select('*')
+        .eq('status','Not Found');
         if (lostError) throw lostError;
 
         let bestMatch = null;
@@ -224,6 +226,7 @@ app.post('/found', authenticateUser, async (req, res) => {
 
             const bestMatchUserId = bestMatch.user_id;
             const currUserId = req.user.id;
+            const possession = foundItem.possession
 
             // ✅ Fetch user details safely
             const { data: lostUserData } = await supabaseAdmin.auth.admin.getUserById(bestMatchUserId);
@@ -237,12 +240,15 @@ app.post('/found', authenticateUser, async (req, res) => {
             const lostUserMail = lostUserData.user.email;
             const foundUserMail = foundUserData.user.email;
 
+            
+            
+
             // ✅ Store match and send notification
             await supabase.from('matched_items').insert([
                 { lost_user: bestMatch.user_id, lost_user_mail: lostUserMail, found_user: req.user.id, found_user_mail: foundUserMail }
             ]);
 
-            await sendMatchNotification(lostUserMail, foundUserMail);
+            await sendMatchNotification(lostUserMail, foundUserMail, possession);
 
             return res.json({ message: "Match found and processed successfully!" });
         }
@@ -274,11 +280,9 @@ async function compareWithFlaskAPI(image_url, description) {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
-
-
 const nodemailer = require('nodemailer');
 
-const sendMatchNotification = async (lostUserMail, foundUserMail) => {
+const sendMatchNotification = async (lostUserMail, foundUserMail, possession) => {
     try {
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -288,6 +292,17 @@ const sendMatchNotification = async (lostUserMail, foundUserMail) => {
             }
         });
 
+
+
+        
+        console.log(possession); // Debugging log
+
+        // Determine message based on foundUserPossession
+        const retrievalMessage =
+            possession.toLowerCase() === "with the person"
+                ? "Please contact each other to arrange item retrieval."
+                : `The item is currently located at: ${possession}. Please collect it from there.`;
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: [lostUserMail, foundUserMail],
@@ -295,7 +310,7 @@ const sendMatchNotification = async (lostUserMail, foundUserMail) => {
             text: `Congratulations! We found a match between a lost and found item.\n\n
                    - Lost Item Owner: ${lostUserMail}
                    - Found Item Owner: ${foundUserMail}\n
-                   Please contact each other to arrange item retrieval.`
+                   ${retrievalMessage}`
         };
 
         await transporter.sendMail(mailOptions);
@@ -304,6 +319,38 @@ const sendMatchNotification = async (lostUserMail, foundUserMail) => {
         console.error("❌ Error sending match emails:", error);
     }
 };
+
+
+
+
+// const nodemailer = require('nodemailer');
+
+// const sendMatchNotification = async (lostUserMail, foundUserMail, foundUserPossession) => {
+//     try {
+//         const transporter = nodemailer.createTransport({
+//             service: "gmail",
+//             auth: {
+//                 user: process.env.EMAIL_USER, // ✅ Your email
+//                 pass: process.env.EMAIL_PASS  // ✅ App password (use an App Password if using Gmail)
+//             }
+//         });
+
+//         const mailOptions = {
+//             from: process.env.EMAIL_USER,
+//             to: [lostUserMail, foundUserMail],
+//             subject: "Lost & Found Match Notification",
+//             text: `Congratulations! We found a match between a lost and found item.\n\n
+//                    - Lost Item Owner: ${lostUserMail}
+//                    - Found Item Owner: ${foundUserMail}\n
+//                    Please contact each other to arrange item retrieval.`
+//         };
+
+//         await transporter.sendMail(mailOptions);
+//         console.log("📧 Match notification emails sent successfully!");
+//     } catch (error) {
+//         console.error("❌ Error sending match emails:", error);
+//     }
+// };
 
 // const trial = async () => {
 //     image_url="https://nulgwtgyqlckaglvtqeu.supabase.co/storage/v1/object/public/found-images/found-items/1743524953724-found11.jpg"
